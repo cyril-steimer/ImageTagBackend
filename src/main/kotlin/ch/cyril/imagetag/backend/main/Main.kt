@@ -4,28 +4,12 @@ import ch.cyril.imagetag.backend.rest.*
 import ch.cyril.imagetag.backend.service.filebased.FileBasedServiceFactory
 import io.javalin.Context
 import io.javalin.Javalin
-import java.io.InputStream
 import java.nio.file.Paths
 import javax.servlet.http.HttpServletResponse
 import kotlin.reflect.KClass
 import kotlin.reflect.KFunction
 import kotlin.reflect.KParameter
-import kotlin.reflect.KType
 import kotlin.reflect.full.findAnnotation
-
-//fun main(args: Array<String>) {
-//    val dir = Paths.get("/Users/csteimer/projects/eduself/testFolder")
-//    val serviceFactory = FileBasedServiceFactory(dir)
-//    val queryFactory = serviceFactory.createQueryFactory()
-//    val imageDao = serviceFactory.createImageDao()
-//    val tagDao = serviceFactory.createTagDao()
-//
-//    val tags = tagDao.getAllTags()
-//
-//    for (tag in tags) {
-//        println(tag)
-//    }
-//}
 
 fun main(args: Array<String>) {
     val dir = Paths.get("/Users/csteimer/projects/eduself/testFolder")

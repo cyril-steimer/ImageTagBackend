@@ -2,7 +2,9 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/ImageTagBackend.iml" filepath="$PROJECT_DIR$/ImageTagBackend.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/ImageTagBackend.iml" filepath="$PROJECT_DIR$/.idea/modules/ImageTagBackend.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/ImageTagBackend_main.iml" filepath="$PROJECT_DIR$/.idea/modules/ImageTagBackend_main.iml" group="ImageTagBackend" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/ImageTagBackend_test.iml" filepath="$PROJECT_DIR$/.idea/modules/ImageTagBackend_test.iml" group="ImageTagBackend" />
     </modules>
   </component>
 </project>
