@@ -54,7 +54,7 @@ class ImageRestHandler(private val imageDao: ImageDao, private val tagDao: TagDa
 
     private class DataTypeAdapter: TypeAdapter<ImageData>() {
         override fun write(writer: JsonWriter, data: ImageData) {
-            writer.value(data.data)
+            writer.value(data.base64)
         }
 
         override fun read(reader: JsonReader): ImageData {
@@ -70,7 +70,7 @@ class ImageRestHandler(private val imageDao: ImageDao, private val tagDao: TagDa
 
         override fun shouldSkipField(field: FieldAttributes): Boolean {
             return field.declaringClass == Image::class.java
-                && field.name.equals("data")
+                && field.name.equals("base64")
         }
     }
 

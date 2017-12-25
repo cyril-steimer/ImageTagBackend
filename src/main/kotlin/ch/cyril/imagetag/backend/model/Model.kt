@@ -41,10 +41,10 @@ enum class ImageType(val contentType: String) {
     }
 }
 
-data class ImageData(val data: String) {
+data class ImageData(val base64: String) {
     constructor(bytes: ByteArray) : this(Base64.getEncoder().encodeToString(bytes))
 
     fun getBytes(): ByteArray {
-        return Base64.getDecoder().decode(data)
+        return Base64.getDecoder().decode(base64)
     }
 }

@@ -65,7 +65,7 @@ class CouchbaseImageDao(private val images: Bucket, private val imageData: Bucke
     override fun addImage(imageWithData: ImageWithData) {
         val image = imageWithData.image
         updateImage(image)
-        imageData.insert(StringDocument.create(image.id.id, imageWithData.data.data))
+        imageData.insert(StringDocument.create(image.id.id, imageWithData.data.base64))
     }
 
     override fun updateImage(image: Image) {
