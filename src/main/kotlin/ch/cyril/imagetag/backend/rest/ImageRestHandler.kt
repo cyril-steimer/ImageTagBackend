@@ -1,9 +1,7 @@
 package ch.cyril.imagetag.backend.rest
 
 import ch.cyril.imagetag.backend.model.*
-import ch.cyril.imagetag.backend.service.ImageDao
-import ch.cyril.imagetag.backend.service.ImageQueryFactory
-import ch.cyril.imagetag.backend.service.TagDao
+import ch.cyril.imagetag.backend.service.*
 import ch.cyril.imagetag.backend.util.PagingIterable
 import com.google.gson.*
 import com.google.gson.stream.JsonReader
@@ -11,7 +9,7 @@ import com.google.gson.stream.JsonWriter
 import java.time.Instant
 
 
-class ImageRestHandler(val imageDao: ImageDao, val tagDao: TagDao, val queryFactory: ImageQueryFactory) {
+class ImageRestHandler(val imageDao: ImageDao, val tagDao: TagDao) {
 
     private class InstantTypeAdapter: TypeAdapter<Instant>() {
 
@@ -74,7 +72,7 @@ class ImageRestHandler(val imageDao: ImageDao, val tagDao: TagDao, val queryFact
             .addSerializationExclusionStrategy(ImageDataExclusionStrategy())
             .create()
 
-    private val queryParser = ImageQueryParser(queryFactory)
+    private val queryParser = ImageQueryParser()
 
     fun getImagesByQuery(@Body body: JsonObject,
                          @QueryParam("start") start: Int?,
@@ -96,14 +94,14 @@ class ImageRestHandler(val imageDao: ImageDao, val tagDao: TagDao, val queryFact
     }
 
     fun getImageById(@PathParam("id") id: String): RestResult {
-        val image = imageDao.getOneImage(queryFactory.withId(Id(id)))
+        val image = imageDao.getOneImage(IdImageQuery(Id(id)))
         return RestResult.json(gson.toJson(image))
     }
 
     fun getImagesByTag(@PathParam("tag") tag: String,
                        @QueryParam("start") start: Int?,
                        @QueryParam("count") count: Int?): RestResult {
-        val images = imageDao.getImages(queryFactory.withTag(Tag(tag)))
+        val images = imageDao.getImages(TagImageQuery(Tag(tag)))
         return RestResult.json(gson.toJson(paginate(images, start, count)))
     }
 
@@ -111,7 +109,7 @@ class ImageRestHandler(val imageDao: ImageDao, val tagDao: TagDao, val queryFact
                        @QueryParam("start") start: Int?,
                        @QueryParam("count") count: Int?): RestResult {
         val date = Instant.ofEpochMilli(since)
-        val images = imageDao.getImages(queryFactory.since(date))
+        val images = imageDao.getImages(SinceImageQuery(date))
         return RestResult.json(gson.toJson(paginate(images, start, count)))
     }
 
@@ -119,7 +117,7 @@ class ImageRestHandler(val imageDao: ImageDao, val tagDao: TagDao, val queryFact
                        @QueryParam("start") start: Int?,
                        @QueryParam("count") count: Int?): RestResult {
         val date = Instant.ofEpochMilli(until)
-        val images = imageDao.getImages(queryFactory.until(date))
+        val images = imageDao.getImages(UntilImageQuery(date))
         return RestResult.json(gson.toJson(paginate(images, start, count)))
     }
 
@@ -147,7 +145,7 @@ class ImageRestHandler(val imageDao: ImageDao, val tagDao: TagDao, val queryFact
     }
 
     fun deleteImageById(@PathParam("id") id: String) {
-        val images = imageDao.getImages(queryFactory.withId(Id(id)))
+        val images = imageDao.getImages(IdImageQuery(Id(id)))
         imageDao.deleteImage(images.single())
     }
 

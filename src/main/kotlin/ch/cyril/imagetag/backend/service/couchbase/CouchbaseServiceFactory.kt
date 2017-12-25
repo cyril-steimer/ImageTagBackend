@@ -1,13 +1,11 @@
 package ch.cyril.imagetag.backend.service.couchbase
 
 import ch.cyril.imagetag.backend.service.ImageDao
-import ch.cyril.imagetag.backend.service.ImageQueryFactory
 import ch.cyril.imagetag.backend.service.ServiceFactory
 import ch.cyril.imagetag.backend.service.TagDao
 import com.couchbase.client.java.Bucket
 import com.couchbase.client.java.Cluster
 import com.couchbase.client.java.CouchbaseCluster
-import com.couchbase.client.java.env.CouchbaseEnvironment
 import com.couchbase.client.java.env.DefaultCouchbaseEnvironment
 
 class CouchbaseServiceFactory: ServiceFactory {
@@ -31,9 +29,5 @@ class CouchbaseServiceFactory: ServiceFactory {
 
     override fun createTagDao(): TagDao {
         return CouchbaseTagDao()
-    }
-
-    override fun createQueryFactory(): ImageQueryFactory {
-        return CouchbaseImageQueryFactory()
     }
 }

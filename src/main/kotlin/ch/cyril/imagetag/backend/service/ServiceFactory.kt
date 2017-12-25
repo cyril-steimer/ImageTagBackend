@@ -5,6 +5,4 @@ interface ServiceFactory {
     fun createImageDao(): ImageDao
 
     fun createTagDao(): TagDao
-
-    fun createQueryFactory(): ImageQueryFactory
 }

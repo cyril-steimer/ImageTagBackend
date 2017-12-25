@@ -2,6 +2,7 @@ package ch.cyril.imagetag.backend.service.couchbase
 
 import ch.cyril.imagetag.backend.model.*
 import ch.cyril.imagetag.backend.service.ImageDao
+import ch.cyril.imagetag.backend.service.ImageQuery
 import ch.cyril.imagetag.backend.util.ListPagingIterable
 import ch.cyril.imagetag.backend.util.PagingIterable
 import com.couchbase.client.java.Bucket
@@ -12,6 +13,10 @@ import com.couchbase.client.java.query.Select
 import java.time.Instant
 
 class CouchbaseImageDao(val images: Bucket) : ImageDao  {
+
+    override fun getImages(query: ImageQuery): PagingIterable<Image> {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
 
     override fun getAllImages(): PagingIterable<Image> {
         val query = Select.select("*").from("images")

@@ -2,20 +2,18 @@ package ch.cyril.imagetag.backend.rest
 
 import ch.cyril.imagetag.backend.model.Id
 import ch.cyril.imagetag.backend.model.Tag
-import ch.cyril.imagetag.backend.service.ImageQuery
-import ch.cyril.imagetag.backend.service.ImageQueryFactory
-import com.google.gson.Gson
+import ch.cyril.imagetag.backend.service.*
 import com.google.gson.JsonElement
 import com.google.gson.JsonObject
 import java.time.Instant
 
-class ImageQueryParser(val queryFactory: ImageQueryFactory) {
+class ImageQueryParser {
 
     private val handlers = mapOf<String, (JsonElement) -> ImageQuery>(
-            Pair("tag", { elem -> queryFactory.withTag(Tag(elem.asString)) }),
-            Pair("since", { elem -> queryFactory.since(Instant.ofEpochMilli(elem.asLong)) }),
-            Pair("until", { elem -> queryFactory.until(Instant.ofEpochMilli(elem.asLong)) }),
-            Pair("id", { elem -> queryFactory.withId(Id(elem.asString)) }),
+            Pair("tag", { elem -> TagImageQuery(Tag(elem.asString)) }),
+            Pair("since", { elem -> SinceImageQuery(Instant.ofEpochMilli(elem.asLong)) }),
+            Pair("until", { elem -> UntilImageQuery(Instant.ofEpochMilli(elem.asLong)) }),
+            Pair("id", { elem -> IdImageQuery(Id(elem.asString)) }),
             Pair("and", this::handleAnd),
             Pair("or", this::handleOr))
 
@@ -31,12 +29,12 @@ class ImageQueryParser(val queryFactory: ImageQueryFactory) {
 
     private fun handleAnd(elem: JsonElement): ImageQuery {
         val queries = getSubQueries(elem)
-        return queryFactory.and(*queries)
+        return AndImageQuery(*queries)
     }
 
     private fun handleOr(elem: JsonElement): ImageQuery {
         val queries = getSubQueries(elem)
-        return queryFactory.or(*queries)
+        return OrImageQuery(*queries)
     }
 
     private fun getSubQueries(obj: JsonElement): Array<ImageQuery> {

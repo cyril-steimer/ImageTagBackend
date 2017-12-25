@@ -13,9 +13,7 @@ interface ImageDao {
         return images.firstOrNull()
     }
 
-    fun getImages(query: ImageQuery): PagingIterable<Image> {
-        return query.apply()
-    }
+    fun getImages(query: ImageQuery): PagingIterable<Image>
 
     fun getImageWithData(id: Id): ImageWithData
 

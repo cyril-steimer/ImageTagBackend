@@ -2,6 +2,7 @@ package ch.cyril.imagetag.backend.main
 
 import ch.cyril.imagetag.backend.rest.*
 import ch.cyril.imagetag.backend.rest.javalin.JavalinRestContext
+import ch.cyril.imagetag.backend.service.couchbase.CouchbaseServiceFactory
 import ch.cyril.imagetag.backend.service.filebased.FileBasedServiceFactory
 import com.google.gson.Gson
 import io.javalin.Context
@@ -15,13 +16,12 @@ import kotlin.reflect.full.findAnnotation
 
 fun main(args: Array<String>) {
 
-    val dir = Paths.get("C:\\Users\\Cyril\\Projects\\ImageTag\\images")
+    val dir = Paths.get("C:\\Users\\Cyril Steimer\\Documents\\Projects\\ImageTag\\images")
     val serviceFactory = FileBasedServiceFactory(dir)
     val tagDao = serviceFactory.createTagDao()
     val imageDao = serviceFactory.createImageDao()
-    val queryFactory = serviceFactory.createQueryFactory()
 
-    val handler = ImageRestHandler(imageDao, tagDao, queryFactory)
+    val handler = ImageRestHandler(imageDao, tagDao)
 
     val app = Javalin.create()
             .port(8100)
