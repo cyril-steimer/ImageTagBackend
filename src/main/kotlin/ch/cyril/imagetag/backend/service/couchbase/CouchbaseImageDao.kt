@@ -22,9 +22,12 @@ class CouchbaseImageDao(val images: Bucket) : ImageDao  {
         return ListPagingIterable(images)
     }
 
-    override fun addImage(image: Image) {
-        val json = imageToJson(image)
-        images.insert(JsonDocument.create(image.id.id, json))
+    override fun getImageWithData(id: Id): ImageWithData {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun addImage(imageWithData: ImageWithData) {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
     override fun updateImage(image: Image) {
@@ -41,8 +44,7 @@ class CouchbaseImageDao(val images: Bucket) : ImageDao  {
         val type = ImageType.ofFileName(id.id)
         val creationDate = Instant.ofEpochMilli(json.getLong("creationDate"))
         val tags = emptySet<Tag>().toMutableSet()
-        val data = ImageData(json.getString("data"))
-        return Image(id, type, creationDate, tags, data)
+        return Image(id, type, creationDate, tags)
     }
 
     private fun imageToJson(image: Image): JsonObject {
@@ -50,7 +52,6 @@ class CouchbaseImageDao(val images: Bucket) : ImageDao  {
         res.put("id", image.id.id)
         res.put("creationDate", image.creationDate.toEpochMilli())
         res.put("tags", JsonArray.empty())
-        res.put("data", image.data!!.data)
         return res
     }
 }

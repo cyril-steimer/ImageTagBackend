@@ -47,21 +47,20 @@ internal class FileBasedUtil(val directory: Path, val tagReaderWriter: FileTagRe
         return Files.readAttributes(location, BasicFileAttributes::class.java).creationTime().toInstant()
     }
 
-    fun getImagePath(image: Image): Path {
-        val decoded = URLDecoder.decode(image.id.id, "UTF-8")
+    fun getImagePath(id: Id): Path {
+        val decoded = URLDecoder.decode(id.id, "UTF-8")
         return directory.resolve(decoded)
     }
 
     private fun createImage(location: Path): Image {
         val id = getId(location)
         val type = getImageType(location)
-        val data = Files.readAllBytes(location)
         val tags = tagReaderWriter.readTags(location).toMutableSet()
-        return Image(id, type, getCreationTime(location), tags, ImageData(data))
+        return Image(id, type, getCreationTime(location), tags)
     }
 
     private fun getImageFiles(directory: Path): Stream<Path> {
-        val isImageFile = BiPredicate<Path, BasicFileAttributes> { p, a -> isImageFile(p) }
+        val isImageFile = BiPredicate<Path, BasicFileAttributes> { p, _ -> isImageFile(p) }
         return Files.find(directory, Int.MAX_VALUE, isImageFile)
     }
 

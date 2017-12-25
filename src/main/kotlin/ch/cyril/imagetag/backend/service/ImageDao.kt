@@ -1,6 +1,9 @@
 package ch.cyril.imagetag.backend.service
 
+import ch.cyril.imagetag.backend.model.Id
 import ch.cyril.imagetag.backend.model.Image
+import ch.cyril.imagetag.backend.model.ImageData
+import ch.cyril.imagetag.backend.model.ImageWithData
 import ch.cyril.imagetag.backend.util.PagingIterable
 
 interface ImageDao {
@@ -14,9 +17,11 @@ interface ImageDao {
         return query.apply()
     }
 
+    fun getImageWithData(id: Id): ImageWithData
+
     fun getAllImages(): PagingIterable<Image>
 
-    fun addImage(image: Image)
+    fun addImage(imageWithData: ImageWithData)
 
     fun updateImage(image: Image)
 

@@ -124,8 +124,8 @@ class ImageRestHandler(val imageDao: ImageDao, val tagDao: TagDao, val queryFact
     }
 
     fun getImageDataById(@PathParam("id") id: String): RestResult {
-        val image = imageDao.getOneImage(queryFactory.withId(Id(id)))
-        return RestResult.imageData(image!!.data!!.getBytes(), image.type)
+        val imageWithData = imageDao.getImageWithData(Id(id))
+        return RestResult.imageData(imageWithData.data.getBytes(), imageWithData.image.type)
     }
 
     fun updateImage(@Body body: String) {
@@ -138,12 +138,12 @@ class ImageRestHandler(val imageDao: ImageDao, val tagDao: TagDao, val queryFact
                     @Body body: ByteArray) {
         val id = Id(fileName)
         val type = ImageType.ofFileName(fileName)
-        val data = ImageData(body)
         val tags = tagNames
                 .map { t -> Tag(t) }
                 .toMutableSet()
-        val image = Image(id, type, Instant.now(), tags, data)
-        imageDao.addImage(image)
+        val image = Image(id, type, Instant.now(), tags)
+        val data = ImageData(body)
+        imageDao.addImage(ImageWithData(image, data))
     }
 
     fun deleteImageById(@PathParam("id") id: String) {

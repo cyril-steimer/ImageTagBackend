@@ -3,7 +3,9 @@ package ch.cyril.imagetag.backend.model
 import java.time.Instant
 import java.util.*
 
-data class Image(val id: Id, val type: ImageType, val creationDate: Instant, val tags: MutableSet<Tag>, val data: ImageData?)
+data class Image(val id: Id, val type: ImageType, val creationDate: Instant, val tags: MutableSet<Tag>)
+
+data class ImageWithData(val image: Image, val data: ImageData)
 
 data class Id(val id: String)
 
