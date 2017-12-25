@@ -2,15 +2,19 @@ package ch.cyril.imagetag.backend.main
 
 import ch.cyril.imagetag.backend.rest.*
 import ch.cyril.imagetag.backend.rest.javalin.JavalinRestContext
+import ch.cyril.imagetag.backend.service.ServiceFactoryLoader
 import ch.cyril.imagetag.backend.service.couchbase.CouchbaseServiceFactory
 import io.javalin.Context
 import io.javalin.Javalin
+import java.nio.file.Paths
 import javax.servlet.http.HttpServletResponse
 import kotlin.reflect.KFunction
 
 fun main(args: Array<String>) {
 
-    val serviceFactory = CouchbaseServiceFactory()
+    val configFile = Paths.get("config.json")
+
+    val serviceFactory = ServiceFactoryLoader(configFile).load()
     val tagDao = serviceFactory.createTagDao()
     val imageDao = serviceFactory.createImageDao()
 
