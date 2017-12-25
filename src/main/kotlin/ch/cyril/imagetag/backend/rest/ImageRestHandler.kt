@@ -9,7 +9,17 @@ import com.google.gson.stream.JsonWriter
 import java.time.Instant
 
 
-class ImageRestHandler(val imageDao: ImageDao, val tagDao: TagDao) {
+class ImageRestHandler(private val imageDao: ImageDao, private val tagDao: TagDao) {
+
+    companion object {
+        val GSON = GsonBuilder()
+            .registerTypeAdapter(Instant::class.java, InstantTypeAdapter().nullSafe())
+            .registerTypeAdapter(Tag::class.java, TagTypeAdapter().nullSafe())
+            .registerTypeAdapter(Id::class.java, IdTypeAdapter().nullSafe())
+            .registerTypeAdapter(ImageData::class.java, DataTypeAdapter().nullSafe())
+            .addSerializationExclusionStrategy(ImageDataExclusionStrategy())
+            .create()
+    }
 
     private class InstantTypeAdapter: TypeAdapter<Instant>() {
 
@@ -64,14 +74,6 @@ class ImageRestHandler(val imageDao: ImageDao, val tagDao: TagDao) {
         }
     }
 
-    private val gson = GsonBuilder()
-            .registerTypeAdapter(Instant::class.java, InstantTypeAdapter().nullSafe())
-            .registerTypeAdapter(Tag::class.java, TagTypeAdapter().nullSafe())
-            .registerTypeAdapter(Id::class.java, IdTypeAdapter().nullSafe())
-            .registerTypeAdapter(ImageData::class.java, DataTypeAdapter().nullSafe())
-            .addSerializationExclusionStrategy(ImageDataExclusionStrategy())
-            .create()
-
     private val queryParser = ImageQueryParser()
 
     fun getImagesByQuery(@Body body: JsonObject,
@@ -79,30 +81,30 @@ class ImageRestHandler(val imageDao: ImageDao, val tagDao: TagDao) {
                          @QueryParam("count") count: Int?): RestResult {
         val parsed = queryParser.parse(body)
         val images = imageDao.getImages(parsed)
-        return RestResult.json(gson.toJson(paginate(images, start, count)))
+        return RestResult.json(GSON.toJson(paginate(images, start, count)))
     }
 
     fun getAllImages(@QueryParam("start") start: Int?,
                      @QueryParam("count") count: Int?): RestResult {
         val images = imageDao.getAllImages()
-        return RestResult.json(gson.toJson(paginate(images, start, count)))
+        return RestResult.json(GSON.toJson(paginate(images, start, count)))
     }
 
     fun getAllTags(): RestResult {
         val tags = tagDao.getAllTags()
-        return RestResult.json(gson.toJson(tags))
+        return RestResult.json(GSON.toJson(tags))
     }
 
     fun getImageById(@PathParam("id") id: String): RestResult {
         val image = imageDao.getOneImage(IdImageQuery(Id(id)))
-        return RestResult.json(gson.toJson(image))
+        return RestResult.json(GSON.toJson(image))
     }
 
     fun getImagesByTag(@PathParam("tag") tag: String,
                        @QueryParam("start") start: Int?,
                        @QueryParam("count") count: Int?): RestResult {
         val images = imageDao.getImages(TagImageQuery(Tag(tag)))
-        return RestResult.json(gson.toJson(paginate(images, start, count)))
+        return RestResult.json(GSON.toJson(paginate(images, start, count)))
     }
 
     fun getImagesSince(@PathParam("since") since: Long,
@@ -110,7 +112,7 @@ class ImageRestHandler(val imageDao: ImageDao, val tagDao: TagDao) {
                        @QueryParam("count") count: Int?): RestResult {
         val date = Instant.ofEpochMilli(since)
         val images = imageDao.getImages(SinceImageQuery(date))
-        return RestResult.json(gson.toJson(paginate(images, start, count)))
+        return RestResult.json(GSON.toJson(paginate(images, start, count)))
     }
 
     fun getImagesUntil(@PathParam("until") until: Long,
@@ -118,7 +120,7 @@ class ImageRestHandler(val imageDao: ImageDao, val tagDao: TagDao) {
                        @QueryParam("count") count: Int?): RestResult {
         val date = Instant.ofEpochMilli(until)
         val images = imageDao.getImages(UntilImageQuery(date))
-        return RestResult.json(gson.toJson(paginate(images, start, count)))
+        return RestResult.json(GSON.toJson(paginate(images, start, count)))
     }
 
     fun getImageDataById(@PathParam("id") id: String): RestResult {
@@ -126,8 +128,7 @@ class ImageRestHandler(val imageDao: ImageDao, val tagDao: TagDao) {
         return RestResult.imageData(imageWithData.data.getBytes(), imageWithData.image.type)
     }
 
-    fun updateImage(@Body body: String) {
-        val image = gson.fromJson(body, Image::class.java)
+    fun updateImage(@Body image: Image) {
         imageDao.updateImage(image)
     }
 

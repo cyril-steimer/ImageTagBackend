@@ -13,6 +13,7 @@ class CouchbaseServiceFactory: ServiceFactory {
     val cluster: Cluster
 
     val images: Bucket
+    val imageData: Bucket
 
     init {
         val env = DefaultCouchbaseEnvironment.builder().autoreleaseAfter(50_000).build()
@@ -21,13 +22,15 @@ class CouchbaseServiceFactory: ServiceFactory {
 
         images = cluster.openBucket("images")
         images.bucketManager().createN1qlPrimaryIndex(true, false)
+
+        imageData = cluster.openBucket("imageData")
     }
 
     override fun createImageDao(): ImageDao {
-        return CouchbaseImageDao(images)
+        return CouchbaseImageDao(images, imageData)
     }
 
     override fun createTagDao(): TagDao {
-        return CouchbaseTagDao()
+        return CouchbaseTagDao(images)
     }
 }

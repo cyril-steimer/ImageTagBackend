@@ -7,32 +7,65 @@ import ch.cyril.imagetag.backend.util.ListPagingIterable
 import ch.cyril.imagetag.backend.util.PagingIterable
 import com.couchbase.client.java.Bucket
 import com.couchbase.client.java.document.JsonDocument
+import com.couchbase.client.java.document.StringDocument
 import com.couchbase.client.java.document.json.JsonArray
 import com.couchbase.client.java.document.json.JsonObject
+import com.couchbase.client.java.query.N1qlQueryResult
 import com.couchbase.client.java.query.Select
 import java.time.Instant
 
-class CouchbaseImageDao(val images: Bucket) : ImageDao  {
+class CouchbaseImageDao(private val images: Bucket, private val imageData: Bucket) : ImageDao  {
 
-    override fun getImages(query: ImageQuery): PagingIterable<Image> {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    companion object {
+        fun imageToJson(image: Image): JsonObject {
+            val res = JsonObject.create()
+            res.put("id", image.id.id)
+            res.put("type", image.type.name)
+            res.put("creationDate", image.creationDate.toEpochMilli())
+            val tags = image.tags
+                    .map { t -> t.tag }
+                    .toTypedArray()
+            res.put("tags", JsonArray.from(*tags))
+            return res
+        }
+
+        fun imageFromJson(json: JsonObject): Image {
+            val id = Id(json.getString("id"))
+            val type = ImageType.valueOf(json.getString("type"))
+            val creationDate = Instant.ofEpochMilli(json.getLong("creationDate"))
+            val tags = json.getArray("tags")
+                    .map { j -> Tag(j.toString()) }
+                    .toMutableSet()
+            return Image(id, type, creationDate, tags)
+        }
     }
+
+    private val queryVisitor = CouchbaseImageQueryVisitor()
 
     override fun getAllImages(): PagingIterable<Image> {
         val query = Select.select("*").from("images")
         val result = images.query(query)
-        val images = result.allRows()
-                .map { r -> imageFromJson(r.value().getObject("images")) }
-                .toList()
-        return ListPagingIterable(images)
+        return handleResult(result)
+    }
+
+    override fun getImages(query: ImageQuery): PagingIterable<Image> {
+        val select = Select.select("*").from("images")
+        val where = select.where(query.accept(queryVisitor, null))
+        println(where)
+        val result = images.query(where)
+        return handleResult(result)
     }
 
     override fun getImageWithData(id: Id): ImageWithData {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        val image = imageFromJson(images[id.id].content())
+        val data = imageData.get(id.id, StringDocument::class.java).content()
+        return ImageWithData(image, ImageData(data))
     }
 
     override fun addImage(imageWithData: ImageWithData) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        val image = imageWithData.image
+        updateImage(image)
+        imageData.insert(StringDocument.create(image.id.id, imageWithData.data.data))
     }
 
     override fun updateImage(image: Image) {
@@ -41,22 +74,15 @@ class CouchbaseImageDao(val images: Bucket) : ImageDao  {
     }
 
     override fun deleteImage(image: Image) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        val id = image.id.id
+        images.remove(id)
+        imageData.remove(id)
     }
 
-    private fun imageFromJson(json: JsonObject): Image {
-        val id = Id(json.getString("id"))
-        val type = ImageType.ofFileName(id.id)
-        val creationDate = Instant.ofEpochMilli(json.getLong("creationDate"))
-        val tags = emptySet<Tag>().toMutableSet()
-        return Image(id, type, creationDate, tags)
-    }
-
-    private fun imageToJson(image: Image): JsonObject {
-        val res = JsonObject.create()
-        res.put("id", image.id.id)
-        res.put("creationDate", image.creationDate.toEpochMilli())
-        res.put("tags", JsonArray.empty())
-        return res
+    private fun handleResult(result: N1qlQueryResult): PagingIterable<Image> {
+        val images = result.allRows()
+                .map { r -> imageFromJson(r.value().getObject("images")) }
+                .toList()
+        return ListPagingIterable(images)
     }
 }

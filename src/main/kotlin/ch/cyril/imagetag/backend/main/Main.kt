@@ -16,8 +16,7 @@ import kotlin.reflect.full.findAnnotation
 
 fun main(args: Array<String>) {
 
-    val dir = Paths.get("C:\\Users\\Cyril Steimer\\Documents\\Projects\\ImageTag\\images")
-    val serviceFactory = FileBasedServiceFactory(dir)
+    val serviceFactory = CouchbaseServiceFactory()
     val tagDao = serviceFactory.createTagDao()
     val imageDao = serviceFactory.createImageDao()
 

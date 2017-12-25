@@ -1,12 +1,13 @@
 package ch.cyril.imagetag.backend.rest
 
-import com.google.gson.Gson
 import kotlin.reflect.KClass
 import kotlin.reflect.KFunction
 import kotlin.reflect.KParameter
 import kotlin.reflect.full.findAnnotation
 
 class RestHandlerInvoker {
+
+    private val gson = ImageRestHandler.GSON
 
     fun invoke(handler: KFunction<RestResult>, ctx: RestContext) {
         val params = gatherParams(handler, ctx)
@@ -38,7 +39,7 @@ class RestHandlerInvoker {
         if (!String::class.isInstance(value)) {
             return value
         }
-        return Gson().fromJson(value as String, cls.java)
+        return gson.fromJson(value as String, cls.java)
     }
 
     private fun validateParamValue(param: KParameter, value: Any?) {
