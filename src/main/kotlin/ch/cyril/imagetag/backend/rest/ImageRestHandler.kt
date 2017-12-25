@@ -63,9 +63,9 @@ class ImageRestHandler(private val imageDao: ImageDao, private val tagDao: TagDa
 
     private val queryParser = ImageQueryParser()
 
-    fun getImagesByQuery(@Body body: JsonObject,
-                         @QueryParam("start") start: Int?,
-                         @QueryParam("count") count: Int?): RestResult {
+    fun getImagesByCompositeQuery(@Body body: JsonObject,
+                                  @QueryParam("start") start: Int?,
+                                  @QueryParam("count") count: Int?): RestResult {
         val parsed = queryParser.parse(body)
         val images = imageDao.getImages(parsed)
         return RestResult.json(GSON.toJson(paginate(images, start, count)))
@@ -87,33 +87,12 @@ class ImageRestHandler(private val imageDao: ImageDao, private val tagDao: TagDa
         return RestResult.json(GSON.toJson(image))
     }
 
-    fun getImagesByTag(@PathParam("tag") tag: String,
-                       @QueryParam("start") start: Int?,
-                       @QueryParam("count") count: Int?): RestResult {
-        val images = imageDao.getImages(TagImageQuery(Tag(tag)))
-        return RestResult.json(GSON.toJson(paginate(images, start, count)))
-    }
-
-    fun getImagesSince(@PathParam("since") since: Long,
-                       @QueryParam("start") start: Int?,
-                       @QueryParam("count") count: Int?): RestResult {
-        val date = Instant.ofEpochMilli(since)
-        val images = imageDao.getImages(SinceImageQuery(date))
-        return RestResult.json(GSON.toJson(paginate(images, start, count)))
-    }
-
-    fun getImagesUntil(@PathParam("until") until: Long,
-                       @QueryParam("start") start: Int?,
-                       @QueryParam("count") count: Int?): RestResult {
-        val date = Instant.ofEpochMilli(until)
-        val images = imageDao.getImages(UntilImageQuery(date))
-        return RestResult.json(GSON.toJson(paginate(images, start, count)))
-    }
-
-    fun getImagesByType(@PathParam("type") type: ImageType,
-                        @QueryParam("start") start: Int?,
-                        @QueryParam("count") count: Int?): RestResult {
-        val images = imageDao.getImages(TypeImageQuery(type))
+    fun getImagesBySimpleQuery(@PathParam("type") type: SimpleImageQueryDescriptor,
+                               @PathParam("arg") arg: String,
+                               @QueryParam("start") start: Int?,
+                               @QueryParam("count") count: Int?): RestResult {
+        val query = type.createQuery(arg)
+        val images = imageDao.getImages(query)
         return RestResult.json(GSON.toJson(paginate(images, start, count)))
     }
 

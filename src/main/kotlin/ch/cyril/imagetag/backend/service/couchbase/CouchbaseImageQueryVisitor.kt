@@ -35,7 +35,7 @@ class CouchbaseImageQueryVisitor : ImageQueryVisitor<Any?, Expression> {
         return visitComposite(query.queries) { e1, e2 -> e1.or(e2) }
     }
 
-    private fun visitComposite(queries: Array<out ImageQuery>, joiner: (Expression, Expression) -> Expression): Expression {
+    private fun visitComposite(queries: Iterable<ImageQuery>, joiner: (Expression, Expression) -> Expression): Expression {
         var res: Expression? = null
         for (query in queries) {
             val expr = query.accept(this, null)

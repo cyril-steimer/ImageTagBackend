@@ -4,44 +4,36 @@ import ch.cyril.imagetag.backend.model.Id
 import ch.cyril.imagetag.backend.model.ImageType
 import ch.cyril.imagetag.backend.model.Tag
 import ch.cyril.imagetag.backend.service.*
+import com.google.gson.JsonArray
 import com.google.gson.JsonElement
 import com.google.gson.JsonObject
 import java.time.Instant
 
 class ImageQueryParser {
 
-    private val handlers = mapOf<String, (JsonElement) -> ImageQuery>(
-            Pair("tag", { elem -> TagImageQuery(Tag(elem.asString)) }),
-            Pair("since", { elem -> SinceImageQuery(Instant.ofEpochMilli(elem.asLong)) }),
-            Pair("until", { elem -> UntilImageQuery(Instant.ofEpochMilli(elem.asLong)) }),
-            Pair("id", { elem -> IdImageQuery(Id(elem.asString)) }),
-            Pair("type", { elem -> TypeImageQuery(ImageType.valueOf(elem.asString)) }),
-            Pair("and", this::handleAnd),
-            Pair("or", this::handleOr))
-
     fun parse(obj: JsonObject): ImageQuery {
         val key = obj.keySet().single()
-        val handler = getHandler(key)
-        return handler.invoke(obj.get(key))
+        val value = obj[key]
+        val res = handleSimpleQuery(key, value)
+        return res ?: handleCompositeQuery(key, value)
     }
 
-    private fun getHandler(key: String): (JsonElement) -> ImageQuery {
-        return handlers.get(key)!!
+    private fun handleSimpleQuery(key: String, value: JsonElement): ImageQuery? {
+        try {
+            return SimpleImageQueryDescriptor.valueOf(key).createQuery(value.asString)
+        } catch (e: IllegalArgumentException) {
+            return null
+        }
     }
 
-    private fun handleAnd(elem: JsonElement): ImageQuery {
-        val queries = getSubQueries(elem)
-        return AndImageQuery(*queries)
+    private fun handleCompositeQuery(key: String, value: JsonElement): ImageQuery {
+        val queries = getSubQueries(value)
+        return CompositeImageQueryDescriptor.valueOf(key).createQuery(queries)
     }
 
-    private fun handleOr(elem: JsonElement): ImageQuery {
-        val queries = getSubQueries(elem)
-        return OrImageQuery(*queries)
-    }
-
-    private fun getSubQueries(obj: JsonElement): Array<ImageQuery> {
+    private fun getSubQueries(obj: JsonElement): Iterable<ImageQuery> {
         return obj.asJsonArray
                 .map { e -> parse(e.asJsonObject) }
-                .toTypedArray()
+                .toList()
     }
 }

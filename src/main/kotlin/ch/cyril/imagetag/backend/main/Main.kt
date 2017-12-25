@@ -3,16 +3,10 @@ package ch.cyril.imagetag.backend.main
 import ch.cyril.imagetag.backend.rest.*
 import ch.cyril.imagetag.backend.rest.javalin.JavalinRestContext
 import ch.cyril.imagetag.backend.service.couchbase.CouchbaseServiceFactory
-import ch.cyril.imagetag.backend.service.filebased.FileBasedServiceFactory
-import com.google.gson.Gson
 import io.javalin.Context
 import io.javalin.Javalin
-import java.nio.file.Paths
 import javax.servlet.http.HttpServletResponse
-import kotlin.reflect.KClass
 import kotlin.reflect.KFunction
-import kotlin.reflect.KParameter
-import kotlin.reflect.full.findAnnotation
 
 fun main(args: Array<String>) {
 
@@ -27,16 +21,13 @@ fun main(args: Array<String>) {
             .start()
 
     app.get("/api/v1/images") { ctx -> handle(handler::getAllImages, ctx) }
-    app.get("/api/v1/images/tag/:tag") { ctx -> handle(handler::getImagesByTag, ctx) }
-    app.get("/api/v1/images/since/:since") { ctx -> handle(handler::getImagesSince, ctx) }
-    app.get("/api/v1/images/until/:until") { ctx -> handle(handler::getImagesUntil, ctx) }
-    app.get("/api/v1/images/type/:type") { ctx -> handle(handler::getImagesByType, ctx) }
     app.get("/api/v1/images/id/:id") { ctx -> handle(handler::getImageById, ctx) }
+    app.get("/api/v1/images/:type/:arg") { ctx -> handle(handler::getImagesBySimpleQuery, ctx) }
 
     app.get("/api/v1/tags") { ctx -> handle(handler::getAllTags, ctx) }
     app.get("/api/v1/imagedata/:id") { ctx -> handle(handler::getImageDataById, ctx) }
 
-    app.post("/api/v1/images") { ctx -> handle(handler::getImagesByQuery, ctx) }
+    app.post("/api/v1/images") { ctx -> handle(handler::getImagesByCompositeQuery, ctx) }
 
     app.put("/api/v1/images") { ctx -> handleVoid(handler::updateImage, ctx) }
     app.put("/api/v1/images/upload") { ctx -> handleVoid(handler::uploadImage, ctx) }

@@ -52,7 +52,7 @@ internal class FileBasedImageQueryVisitor(val directory: Path, tagReader: FileTa
 
     private val util = FileBasedUtil(directory, tagReader)
 
-    private fun composite(queries: Array<out ImageQuery>, joiner: (List<Image>, List<Image>) -> List<Image>): PagingIterable<Image> {
+    private fun composite(queries: Iterable<ImageQuery>, joiner: (List<Image>, List<Image>) -> List<Image>): PagingIterable<Image> {
         var res: List<Image>? = null
         for (query in queries) {
             val queryRes = (query.accept(this, null) as ListPagingIterable<Image>).list

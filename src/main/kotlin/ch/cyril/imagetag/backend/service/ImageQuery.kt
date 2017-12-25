@@ -45,14 +45,14 @@ class TypeImageQuery(val type: ImageType): ImageQuery {
     }
 }
 
-class AndImageQuery(vararg val queries: ImageQuery) : ImageQuery {
+class AndImageQuery(val queries: Iterable<ImageQuery>) : ImageQuery {
 
     override fun <A, R> accept(visitor: ImageQueryVisitor<A, R>, arg: A): R {
         return visitor.visitAndQuery(this, arg)
     }
 }
 
-class OrImageQuery(vararg val queries: ImageQuery) : ImageQuery {
+class OrImageQuery(val queries: Iterable<ImageQuery>) : ImageQuery {
 
     override fun <A, R> accept(visitor: ImageQueryVisitor<A, R>, arg: A): R {
         return visitor.visitOrQuery(this, arg)

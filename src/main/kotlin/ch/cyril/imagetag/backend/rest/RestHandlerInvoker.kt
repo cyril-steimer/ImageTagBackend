@@ -45,7 +45,7 @@ class RestHandlerInvoker {
     private fun validateParamValue(param: KParameter, value: Any?) {
         val nullable = param.type.isMarkedNullable
         if (!nullable && value == null) {
-            throw IllegalArgumentException("Parameter '$param' is not nullable")
+            throw IllegalArgumentException("Parameter '${param.name}' is not nullable")
         }
         val cls = param.type.classifier as KClass<*>
         if (value != null && !cls.isInstance(value)) {
