@@ -35,7 +35,7 @@ class RestHandlerInvoker {
     }
 
     private fun parseParamValue(cls: KClass<*>, value: Any?): Any? {
-        if (!String::class.isInstance(value) || cls == String::class) {
+        if (!String::class.isInstance(value)) {
             return value
         }
         return Gson().fromJson(value as String, cls.java)

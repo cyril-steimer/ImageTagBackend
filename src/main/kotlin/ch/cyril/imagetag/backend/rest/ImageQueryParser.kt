@@ -11,8 +11,6 @@ import java.time.Instant
 
 class ImageQueryParser(val queryFactory: ImageQueryFactory) {
 
-    private val gson = Gson()
-
     private val handlers = mapOf<String, (JsonElement) -> ImageQuery>(
             Pair("tag", { elem -> queryFactory.withTag(Tag(elem.asString)) }),
             Pair("since", { elem -> queryFactory.since(Instant.ofEpochMilli(elem.asLong)) }),
@@ -21,12 +19,7 @@ class ImageQueryParser(val queryFactory: ImageQueryFactory) {
             Pair("and", this::handleAnd),
             Pair("or", this::handleOr))
 
-    fun parse(query: String): ImageQuery {
-        val obj = gson.fromJson(query, JsonObject::class.java)
-        return handle(obj)
-    }
-
-    private fun handle(obj: JsonObject): ImageQuery {
+    fun parse(obj: JsonObject): ImageQuery {
         val key = obj.keySet().single()
         val handler = getHandler(key)
         return handler.invoke(obj.get(key))
@@ -48,7 +41,7 @@ class ImageQueryParser(val queryFactory: ImageQueryFactory) {
 
     private fun getSubQueries(obj: JsonElement): Array<ImageQuery> {
         return obj.asJsonArray
-                .map { e -> handle(e.asJsonObject) }
+                .map { e -> parse(e.asJsonObject) }
                 .toTypedArray()
     }
 }

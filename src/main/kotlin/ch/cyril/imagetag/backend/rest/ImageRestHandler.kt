@@ -5,10 +5,7 @@ import ch.cyril.imagetag.backend.service.ImageDao
 import ch.cyril.imagetag.backend.service.ImageQueryFactory
 import ch.cyril.imagetag.backend.service.TagDao
 import ch.cyril.imagetag.backend.util.PagingIterable
-import com.google.gson.ExclusionStrategy
-import com.google.gson.FieldAttributes
-import com.google.gson.GsonBuilder
-import com.google.gson.TypeAdapter
+import com.google.gson.*
 import com.google.gson.stream.JsonReader
 import com.google.gson.stream.JsonWriter
 import java.time.Instant
@@ -79,7 +76,7 @@ class ImageRestHandler(val imageDao: ImageDao, val tagDao: TagDao, val queryFact
 
     private val queryParser = ImageQueryParser(queryFactory)
 
-    fun getImagesByQuery(@Body body: String,
+    fun getImagesByQuery(@Body body: JsonObject,
                          @QueryParam("start") start: Int?,
                          @QueryParam("count") count: Int?): RestResult {
         val parsed = queryParser.parse(body)
@@ -110,25 +107,25 @@ class ImageRestHandler(val imageDao: ImageDao, val tagDao: TagDao, val queryFact
         return RestResult.json(gson.toJson(paginate(images, start, count)))
     }
 
-    fun getImagesSince(@PathParam("since") since: String,
+    fun getImagesSince(@PathParam("since") since: Long,
                        @QueryParam("start") start: Int?,
                        @QueryParam("count") count: Int?): RestResult {
-        val date = Instant.ofEpochMilli(since.toLong())
+        val date = Instant.ofEpochMilli(since)
         val images = imageDao.getImages(queryFactory.since(date))
         return RestResult.json(gson.toJson(paginate(images, start, count)))
     }
 
-    fun getImagesUntil(@PathParam("until") until: String,
+    fun getImagesUntil(@PathParam("until") until: Long,
                        @QueryParam("start") start: Int?,
                        @QueryParam("count") count: Int?): RestResult {
-        val date = Instant.ofEpochMilli(until.toLong())
+        val date = Instant.ofEpochMilli(until)
         val images = imageDao.getImages(queryFactory.until(date))
         return RestResult.json(gson.toJson(paginate(images, start, count)))
     }
 
     fun getImageDataById(@PathParam("id") id: String): RestResult {
         val image = imageDao.getOneImage(queryFactory.withId(Id(id)))
-        return RestResult.imageData(image!!.data!!.getBytes(), image!!.type)
+        return RestResult.imageData(image!!.data!!.getBytes(), image.type)
     }
 
     fun updateImage(@Body body: String) {
