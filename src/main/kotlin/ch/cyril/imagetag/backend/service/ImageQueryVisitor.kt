@@ -10,6 +10,8 @@ interface ImageQueryVisitor<A, R> {
 
     fun visitIdQuery(query: IdImageQuery, arg: A): R
 
+    fun visitTypeQuery(query: TypeImageQuery, arg: A): R
+
     fun visitAndQuery(query: AndImageQuery, arg: A): R
 
     fun visitOrQuery(query: OrImageQuery, arg: A): R

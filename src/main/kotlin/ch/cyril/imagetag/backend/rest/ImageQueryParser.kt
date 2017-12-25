@@ -1,6 +1,7 @@
 package ch.cyril.imagetag.backend.rest
 
 import ch.cyril.imagetag.backend.model.Id
+import ch.cyril.imagetag.backend.model.ImageType
 import ch.cyril.imagetag.backend.model.Tag
 import ch.cyril.imagetag.backend.service.*
 import com.google.gson.JsonElement
@@ -14,6 +15,7 @@ class ImageQueryParser {
             Pair("since", { elem -> SinceImageQuery(Instant.ofEpochMilli(elem.asLong)) }),
             Pair("until", { elem -> UntilImageQuery(Instant.ofEpochMilli(elem.asLong)) }),
             Pair("id", { elem -> IdImageQuery(Id(elem.asString)) }),
+            Pair("type", { elem -> TypeImageQuery(ImageType.valueOf(elem.asString)) }),
             Pair("and", this::handleAnd),
             Pair("or", this::handleOr))
 

@@ -1,6 +1,7 @@
 package ch.cyril.imagetag.backend.service
 
 import ch.cyril.imagetag.backend.model.Id
+import ch.cyril.imagetag.backend.model.ImageType
 import ch.cyril.imagetag.backend.model.Tag
 import java.time.Instant
 
@@ -34,6 +35,13 @@ class IdImageQuery(val id: Id) : ImageQuery {
 
     override fun <A, R> accept(visitor: ImageQueryVisitor<A, R>, arg: A): R {
         return visitor.visitIdQuery(this, arg)
+    }
+}
+
+class TypeImageQuery(val type: ImageType): ImageQuery {
+
+    override fun <A, R> accept(visitor: ImageQueryVisitor<A, R>, arg: A): R {
+        return visitor.visitTypeQuery(this, arg)
     }
 }
 

@@ -14,19 +14,32 @@ internal class FileBasedImageQueryVisitor(val directory: Path, tagReader: FileTa
     : ImageQueryVisitor<Any?, PagingIterable<Image>> {
 
     override fun visitTagQuery(query: TagImageQuery, arg: Any?): PagingIterable<Image> {
-        return filterByTag(query.tag)
+        val images = util.getAllImages()
+                .filter { img -> img.tags.contains(query.tag) }
+        return ListPagingIterable(images)
     }
 
     override fun visitSinceQuery(query: SinceImageQuery, arg: Any?): PagingIterable<Image> {
-        return filterSince(query.since)
+        return filterByDate { date -> !query.since.isAfter(date) }
     }
 
     override fun visitUntilQuery(query: UntilImageQuery, arg: Any?): PagingIterable<Image> {
-        return filterUntil(query.until)
+        return filterByDate { date -> !query.until.isBefore(date) }
     }
 
     override fun visitIdQuery(query: IdImageQuery, arg: Any?): PagingIterable<Image> {
-        return filterById(query.id)
+        //TODO Does not really work for paths with folders...
+        val id = query.id
+        val encoded = Id(URLEncoder.encode(id.id, "UTF-8"))
+        val images = util.getAllImages()
+                .filter { img -> img.id.equals(encoded) || img.id.equals(id) }
+        return ListPagingIterable(images)
+    }
+
+    override fun visitTypeQuery(query: TypeImageQuery, arg: Any?): PagingIterable<Image> {
+        val images = util.getAllImages()
+                .filter { img -> img.type == query.type }
+        return ListPagingIterable(images)
     }
 
     override fun visitAndQuery(query: AndImageQuery, arg: Any?): PagingIterable<Image> {
@@ -53,31 +66,9 @@ internal class FileBasedImageQueryVisitor(val directory: Path, tagReader: FileTa
         return ListPagingIterable(res)
     }
 
-    private fun filterByTag(tag: Tag): PagingIterable<Image> {
-        val images = util.getAllImages()
-                .filter { img -> img.tags.contains(tag) }
-        return ListPagingIterable(images)
-    }
-
-    private fun filterSince(since: Instant): PagingIterable<Image> {
-        return filterByDate { date -> !since.isAfter(date) }
-    }
-
-    private fun filterUntil(until: Instant): PagingIterable<Image> {
-        return filterByDate { date -> !until.isBefore(date) }
-    }
-
     private fun filterByDate(comparison: (Instant) -> Boolean): PagingIterable<Image> {
         val images = util.getAllImages()
                 .filter { img -> comparison.invoke(img.creationDate) }
-        return ListPagingIterable(images)
-    }
-
-    private fun filterById(id: Id): PagingIterable<Image> {
-        //TODO Does not really work for paths with folders...
-        val encoded = Id(URLEncoder.encode(id.id, "UTF-8"))
-        val images = util.getAllImages()
-                .filter { img -> img.id.equals(encoded) || img.id.equals(id) }
         return ListPagingIterable(images)
     }
 

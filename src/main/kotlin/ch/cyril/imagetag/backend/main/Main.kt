@@ -30,6 +30,7 @@ fun main(args: Array<String>) {
     app.get("/api/v1/images/tag/:tag") { ctx -> handle(handler::getImagesByTag, ctx) }
     app.get("/api/v1/images/since/:since") { ctx -> handle(handler::getImagesSince, ctx) }
     app.get("/api/v1/images/until/:until") { ctx -> handle(handler::getImagesUntil, ctx) }
+    app.get("/api/v1/images/type/:type") { ctx -> handle(handler::getImagesByType, ctx) }
     app.get("/api/v1/images/id/:id") { ctx -> handle(handler::getImageById, ctx) }
 
     app.get("/api/v1/tags") { ctx -> handle(handler::getAllTags, ctx) }

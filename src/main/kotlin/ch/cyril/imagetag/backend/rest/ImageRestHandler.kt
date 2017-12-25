@@ -17,7 +17,6 @@ class ImageRestHandler(private val imageDao: ImageDao, private val tagDao: TagDa
             .registerTypeAdapter(Tag::class.java, TagTypeAdapter().nullSafe())
             .registerTypeAdapter(Id::class.java, IdTypeAdapter().nullSafe())
             .registerTypeAdapter(ImageData::class.java, DataTypeAdapter().nullSafe())
-            .addSerializationExclusionStrategy(ImageDataExclusionStrategy())
             .create()
     }
 
@@ -59,18 +58,6 @@ class ImageRestHandler(private val imageDao: ImageDao, private val tagDao: TagDa
 
         override fun read(reader: JsonReader): ImageData {
             return ImageData(reader.nextString())
-        }
-    }
-
-    private class ImageDataExclusionStrategy : ExclusionStrategy {
-
-        override fun shouldSkipClass(cls: Class<*>): Boolean {
-            return false
-        }
-
-        override fun shouldSkipField(field: FieldAttributes): Boolean {
-            return field.declaringClass == Image::class.java
-                && field.name.equals("base64")
         }
     }
 
@@ -120,6 +107,13 @@ class ImageRestHandler(private val imageDao: ImageDao, private val tagDao: TagDa
                        @QueryParam("count") count: Int?): RestResult {
         val date = Instant.ofEpochMilli(until)
         val images = imageDao.getImages(UntilImageQuery(date))
+        return RestResult.json(GSON.toJson(paginate(images, start, count)))
+    }
+
+    fun getImagesByType(@PathParam("type") type: ImageType,
+                        @QueryParam("start") start: Int?,
+                        @QueryParam("count") count: Int?): RestResult {
+        val images = imageDao.getImages(TypeImageQuery(type))
         return RestResult.json(GSON.toJson(paginate(images, start, count)))
     }
 

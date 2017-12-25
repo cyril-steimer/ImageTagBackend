@@ -23,6 +23,10 @@ class CouchbaseImageQueryVisitor : ImageQueryVisitor<Any?, Expression> {
         return x("id").eq(s(query.id.id))
     }
 
+    override fun visitTypeQuery(query: TypeImageQuery, arg: Any?): Expression {
+        return x("type").eq(s(query.type.name))
+    }
+
     override fun visitAndQuery(query: AndImageQuery, arg: Any?): Expression {
         return visitComposite(query.queries) { e1, e2 -> e1.and(e2) }
     }
