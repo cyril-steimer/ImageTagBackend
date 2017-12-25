@@ -2,6 +2,7 @@ package ch.cyril.imagetag.backend.service.filebased
 
 import ch.cyril.imagetag.backend.model.Image
 import ch.cyril.imagetag.backend.service.ImageDao
+import ch.cyril.imagetag.backend.util.ListPagingIterable
 import ch.cyril.imagetag.backend.util.PagingIterable
 import java.nio.file.Files
 import java.nio.file.Path
@@ -13,7 +14,7 @@ internal class FileBasedImageDao(val directory: Path, val tagReaderWriter: FileT
 
     override fun getAllImages(): PagingIterable<Image> {
         val images = util.getAllImages()
-        return FileBasedImageQueryFactory.ListPagingIterable(images)
+        return ListPagingIterable(images)
     }
 
     override fun addImage(image: Image) {

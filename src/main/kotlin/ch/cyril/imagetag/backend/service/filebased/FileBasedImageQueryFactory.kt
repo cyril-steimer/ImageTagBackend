@@ -5,6 +5,7 @@ import ch.cyril.imagetag.backend.model.Image
 import ch.cyril.imagetag.backend.model.Tag
 import ch.cyril.imagetag.backend.service.ImageQuery
 import ch.cyril.imagetag.backend.service.ImageQueryFactory
+import ch.cyril.imagetag.backend.util.ListPagingIterable
 import ch.cyril.imagetag.backend.util.PagingIterable
 import java.net.URLEncoder
 import java.nio.file.Path
@@ -13,25 +14,6 @@ import java.time.Instant
 internal class FileBasedImageQueryFactory(val directory: Path, val tagReader: FileTagReaderWriter) : ImageQueryFactory {
 
     private val util = FileBasedUtil(directory, tagReader)
-
-    class ListPagingIterable<T>(val list: List<T>) : PagingIterable<T> {
-
-        override fun page(start: Int, end: Int): List<T> {
-            if (start > list.size) {
-                return emptyList()
-            }
-            val endFitted = minOf(end, list.size)
-            return list.subList(start, endFitted)
-        }
-
-        override fun iterator(): Iterator<T> {
-            return list.iterator()
-        }
-
-        override fun size(): Int {
-            return list.size
-        }
-    }
 
     private inner class CompositeQuery(val joiner: (List<Image>, List<Image>) -> List<Image>,
                                        val queries: Array<out ImageQuery>) : ImageQuery {
